@@ -1,0 +1,89 @@
+name: AI Self-Healing Proxy v7
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-self-healing-proxy-v7
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install uv
+          uv sync --frozen
+
+      - name: Generate Clash subscription
+        run: |
+          uv run python generator.py
+          mkdir -p docs
+          cp output/clash.yaml docs/clash.yaml
+          cp output/rocket.txt docs/rocket.txt
+          cp output/v2ray.txt docs/v2ray.txt
+          touch docs/.nojekyll
+
+      - name: Validate Clash subscription
+        run: |
+          cmp --silent output/clash.yaml docs/clash.yaml
+          test -s docs/clash.yaml
+          uv run python generator.py --validate-only --config docs/clash.yaml
+          uv run python -m http.server 8080 --directory docs >/tmp/free-proxy-airport-pages.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in 1 2 3 4 5; do
+            http_code="$(curl --silent --show-error --location --output /tmp/docs-clash.yaml --write-out "%{http_code}" http://127.0.0.1:8080/clash.yaml || true)"
+            if [ "$http_code" = "200" ]; then
+              break
+            fi
+            sleep 1
+          done
+          if [ "${http_code:-}" != "200" ]; then
+            echo "Expected HTTP 200 from docs/clash.yaml, got ${http_code:-none}"
+            exit 1
+          fi
+          test -s /tmp/docs-clash.yaml
+
+      - name: Validate Shadowrocket/V2Ray subscriptions
+        run: |
+          cmp --silent output/rocket.txt docs/rocket.txt
+          cmp --silent output/v2ray.txt docs/v2ray.txt
+          uv run python - <<'PY'
+          import base64
+          from pathlib import Path
+
+          for path in (Path("docs/rocket.txt"), Path("docs/v2ray.txt")):
+              if not path.exists() or path.stat().st_size == 0:
+                  raise SystemExit(f"{path} missing or empty")
+              try:
+                  base64.b64decode(path.read_text(encoding="utf-8").strip(), validate=True)
+              except Exception as exc:
+                  raise SystemExit(f"{path} is not valid base64: {exc}")
+          PY
+
+      - name: Commit output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/clash.yaml output/rocket.txt output/v2ray.txt docs/clash.yaml docs/rocket.txt docs/v2ray.txt docs/.nojekyll
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update subscriptions"
+            git push
+          fi

@@ -1,0 +1,28 @@
+[project]
+name = "free-proxy-airport"
+version = "0.1.0"
+description = "Free Clash/Mihomo proxy subscription generator with real latency benchmarking"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pyyaml>=6.0.3",
+    "requests>=2.34.2",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["generator"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = [
+    "BLE001",  # blind excepts are deliberate resilience against third-party input
+    "S110",    # try/except-pass is deliberate in controller probes
+]
+
