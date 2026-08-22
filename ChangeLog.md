@@ -1,3 +1,30 @@
+# 20260823 Claude Review Fixes (Round 3)
+
+- 修复时间：2026-08-23
+- 依据：第三轮回审（中等 3 项 + 低 8 项）
+- 验证：uv sync + 80/80 单元测试、`ruff check` 全绿、`--validate-only` 通过
+
+## 修复清单
+
+| 编号 | 级别 | 问题 | 修复 |
+| --- | --- | --- | --- |
+| R3-M1 | 中 | `_vless_to_uri` 只读顶层 `path`/`host`，Clash 的 `ws-opts.path` / `ws-opts.headers.Host` 被忽略 → vless+ws 订阅链接损坏（path 恒为 `/`） | 新增 `_ws_transport()` 共享助手，vmess/vless 统一读取嵌套字段；顶层字段仍优先 |
+| R3-M2 | 中 | SS 节点 `plugin`/`plugin-opts` 被静默丢弃，带 obfs / v2ray-plugin 的链接不可用 | 新增 `_ss_plugin_param()` 按 SIP002 输出 `?plugin=`；无法表达的其他插件直接跳过该节点（返回空 URI） |
+| R3-M3 | 中 | hysteria/hysteria2 URI 只认 `insecure` 字段，忽略 Clash 的 `skip-cert-verify` 与全局 `SKIP_CERT_VERIFY` 开关，与 trojan/tuic 行为不一致 | 三条件任一命中即输出 `insecure=1` |
+| R3-L1 | 低 | vmess JSON 的 alpn 列表被 `str()` 序列化成 Python repr（`"['h2', 'http/1.1']"`） | 复用已有 `alpn_value()` 归一化 |
+| R3-L2 | 低 | release 页资产抓取正则不含大写字母，资产名含大写时会整体漏配 | 正则加 `re.IGNORECASE` |
+| R3-L3 | 低 | `.tar.gz` 资产会在解压阶段失败且不尝试下一个候选资产 | `filter_mihomo_assets` 直接排除 tar 包（解压器只支持单文件 .gz/.zip） |
+| R3-L4 | 低 | GitHub API 返回有效 assets 但 tag 缺失/非法时直接最终失败，不落回 release 页回退分支 | API 分支先校验 tag 合法性（与页抓取同一正则），不合法则走回退 |
+| R3-L5 | 低 | 引擎下载与 gzip/zip 解压无大小上限，恶意镜像可填满磁盘 / 解压炸弹 | 新增 `MAX_DOWNLOAD_BYTES`（256MB）：下载流式计数、gzip 解压计数、zip 展开前按 `file_size` 总量校验 |
+| R3-L6 | 低 | trojan over ws/grpc 转订阅时丢失传输层信息 | 非 tcp 网络输出 `type=` + `path/host/serviceName`（纯 tcp 链接保持字节不变） |
+| R3-L7 | 低 | `PROBE_PASS_MIN > PROBE_TIMES` 组合静默全灭（仅有降级兑底无提示） | 测速开始前打印 `[WARN]` 提示必然 0 存活 |
+| R3-L8 | 低 | `fetch_text` 流式响应在异常路径未显式关闭 | 改为上下文管理器保证关闭 |
+
+## 测试
+
+- 新增 19 个回归测试（URI 传输字段 ×9、hy2 证书策略 ×4、资产筛选与回退 ×4、下载大小上限、探测配置告警、响应关闭）。
+- 最终状态：**80/80 通过**，`ruff check generator.py tests/test_generator.py` 无告警。
+
 # 20260822 Codex Review Fixes (Round 2)
 
 - 修复时间：2026-08-22

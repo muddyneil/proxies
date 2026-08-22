@@ -220,18 +220,24 @@ def fetch_text(url: str, retries: int = MAX_RETRIES) -> str:
     last_error: Exception | None = None
     for attempt in range(1, retries + 1):
         try:
-            response = requests.get(url, headers=headers, timeout=SOURCE_TIMEOUT, stream=True)
-            response.raise_for_status()
-            chunks = []
-            received = 0
-            for chunk in response.iter_content(chunk_size=64 * 1024):
-                if not chunk:
-                    continue
-                received += len(chunk)
-                if received > MAX_SOURCE_BYTES:
-                    raise RuntimeError(f"source response exceeds {MAX_SOURCE_BYTES} bytes")
-                chunks.append(chunk)
-            return b"".join(chunks).decode("utf-8", errors="replace")
+            # Context manager guarantees the streaming response is closed even
+            # when a mid-body error aborts the read.
+            with requests.get(
+                url, headers=headers, timeout=SOURCE_TIMEOUT, stream=True
+            ) as response:
+                response.raise_for_status()
+                chunks = []
+                received = 0
+                for chunk in response.iter_content(chunk_size=64 * 1024):
+                    if not chunk:
+                        continue
+                    received += len(chunk)
+                    if received > MAX_SOURCE_BYTES:
+                        raise RuntimeError(
+                            f"source response exceeds {MAX_SOURCE_BYTES} bytes"
+                        )
+                    chunks.append(chunk)
+                return b"".join(chunks).decode("utf-8", errors="replace")
         except Exception as exc:
             last_error = exc
             if attempt < retries:
@@ -597,6 +603,10 @@ def filter_mihomo_assets(names: list[str]) -> list[str]:
             continue
         if not name.endswith((".gz", ".zip")):
             continue
+        if name.endswith(".tar.gz"):
+            # extract_mihomo_binary only handles single-binary .gz / .zip;
+            # tarballs would fail late without a retry on the next candidate.
+            continue
         candidates.append((mihomo_asset_score(name), raw))
     candidates.sort(key=lambda item: item[0], reverse=True)
     return [name for _, name in candidates]
@@ -655,23 +665,33 @@ def select_mihomo_asset() -> str:
                     "retrying via release page"
                 )
             else:
-                tag = str(data.get("tag_name", ""))
+                api_tag = str(data.get("tag_name", ""))
                 names = [
                     str(asset.get("name", ""))
                     for asset in data.get("assets", [])
                     if isinstance(asset, dict)
                 ]
-                matched = filter_mihomo_assets(names)
-                if not names:
+                api_matched = filter_mihomo_assets(names)
+                if not re.fullmatch(r"v[\w.+-]+", api_tag):
+                    # An unusable tag must fall through to the release-page
+                    # path instead of failing at the final guard below.
+                    print(
+                        "[WARN] GitHub API returned an unexpected release tag; "
+                        "retrying via release page"
+                    )
+                elif not names:
                     print(
                         "[WARN] GitHub API returned an empty asset list; "
                         "retrying via release page"
                     )
-                elif not matched:
+                elif not api_matched:
                     print(
                         "[WARN] GitHub API had no matching Mihomo asset; "
                         "retrying via release page"
                     )
+                else:
+                    tag = api_tag
+                    matched = api_matched
     except Exception as exc:
         print(f"[WARN] GitHub API lookup failed ({exc}); retrying via release page")
 
@@ -693,7 +713,8 @@ def select_mihomo_asset() -> str:
                 raise RuntimeError(f"unexpected Mihomo release tag: {tag}")
             page_url = f"https://github.com/{MIHOMO_REPO}/releases/expanded_assets/{tag}"
             html = fetch_text(page_url)
-            names = re.findall(r"mihomo-[a-z0-9.+-]+?\.(?:gz|zip)", html)
+            # IGNORECASE so asset names containing uppercase letters are kept.
+            names = re.findall(r"mihomo-[a-z0-9.+-]+?\.(?:gz|zip)", html, re.IGNORECASE)
             matched = filter_mihomo_assets(unique_ordered(names))
             if not matched:
                 raise RuntimeError(f"no matching Mihomo release asset found in {tag}")
@@ -714,6 +735,10 @@ def select_mihomo_asset() -> str:
 
 
 MIN_ARCHIVE_SIZE = 1024 * 1024
+
+# Upper bound for the downloaded archive and its decompressed contents so a
+# hostile mirror cannot fill the disk (mihomo archives are tens of MB).
+MAX_DOWNLOAD_BYTES = 256 * 1024 * 1024
 
 
 def archive_looks_valid(path: Path) -> bool:
@@ -744,9 +769,15 @@ def download_file(url: str, directory: Path) -> Path:
         try:
             with requests.get(attempt, stream=True, timeout=SOURCE_TIMEOUT) as response:
                 response.raise_for_status()
+                received = 0
                 with target.open("wb") as file:
                     for chunk in response.iter_content(chunk_size=1024 * 512):
                         if chunk:
+                            received += len(chunk)
+                            if received > MAX_DOWNLOAD_BYTES:
+                                raise RuntimeError(
+                                    f"download exceeds {MAX_DOWNLOAD_BYTES} bytes"
+                                )
                             file.write(chunk)
             if not archive_looks_valid(target):
                 raise RuntimeError(
@@ -776,14 +807,27 @@ def _safe_zip_extract(archive: Path, directory: Path) -> None:
             target = os.path.realpath(os.path.join(root, name))
             if os.path.commonpath([root, target]) != root:
                 raise RuntimeError(f"unsafe zip entry: {member.filename}")
+        total = sum(member.file_size for member in zipped.infolist())
+        if total > MAX_DOWNLOAD_BYTES:
+            raise RuntimeError(f"decompressed archive exceeds {MAX_DOWNLOAD_BYTES} bytes")
         zipped.extractall(directory)
 
 
 def extract_mihomo_binary(archive: Path, directory: Path) -> Path:
     if archive.suffix == ".gz" and not archive.name.endswith(".tar.gz"):
         target = directory / archive.name[:-3]
+        written = 0
         with gzip.open(archive, "rb") as source, target.open("wb") as dest:
-            shutil.copyfileobj(source, dest)
+            while True:
+                chunk = source.read(1024 * 512)
+                if not chunk:
+                    break
+                written += len(chunk)
+                if written > MAX_DOWNLOAD_BYTES:
+                    raise RuntimeError(
+                        f"decompressed archive exceeds {MAX_DOWNLOAD_BYTES} bytes"
+                    )
+                dest.write(chunk)
         return target
 
     if archive.suffix == ".zip":
@@ -899,6 +943,11 @@ def benchmark_proxies(proxies: list[dict[str, Any]]) -> list[ProxyMetric]:
     """
     if not proxies:
         return []
+    if PROBE_PASS_MIN > PROBE_TIMES:
+        print(
+            f"[WARN] PROBE_PASS_MIN={PROBE_PASS_MIN} exceeds PROBE_TIMES={PROBE_TIMES}; "
+            "no node can survive probing"
+        )
 
     engine = find_or_install_mihomo()
     metrics: list[ProxyMetric] = []
@@ -1331,6 +1380,71 @@ def _uri_host(server: str) -> str:
     return f"[{server}]" if ":" in server else server
 
 
+def _ws_transport(proxy: dict[str, Any]) -> tuple[str, str]:
+    """Return ``(path, host)`` for ws transport.
+
+    Clash YAML nests them under ``ws-opts.path`` / ``ws-opts.headers.Host``;
+    top-level ``path`` / ``host`` keys win when present so both layouts
+    convert correctly.
+    """
+    ws_opts = proxy.get("ws-opts")
+    ws_opts = ws_opts if isinstance(ws_opts, dict) else {}
+    headers = ws_opts.get("headers")
+    header_host = str(headers.get("Host", "")) if isinstance(headers, dict) else ""
+    path = str(proxy.get("path") or ws_opts.get("path") or "/")
+    host = str(proxy.get("host") or header_host)
+    return path, host
+
+
+def _grpc_service_name(proxy: dict[str, Any]) -> str:
+    """Return the gRPC service name (top-level key wins over grpc-opts)."""
+    service = proxy.get("serviceName")
+    if not service:
+        grpc_opts = proxy.get("grpc-opts")
+        if isinstance(grpc_opts, dict):
+            service = grpc_opts.get("grpc-service-name", "")
+    return str(service or "")
+
+
+def _ss_plugin_param(proxy: dict[str, Any]) -> str:
+    """Build the SIP002 ``plugin`` query value for ss nodes.
+
+    Covers simple-obfs and v2ray-plugin, which is what virtually all public
+    ss sources use. Returns "" for other plugins so callers drop the node
+    instead of emitting a link that can never connect.
+    """
+    plugin = str(proxy.get("plugin", "")).strip().lower()
+    if not plugin:
+        return ""
+    opts = proxy.get("plugin-opts")
+    opts = opts if isinstance(opts, dict) else {}
+
+    parts: list[str] = []
+    if plugin in ("obfs", "obfs-local", "simple-obfs"):
+        parts.append("obfs-local")
+        mode = str(opts.get("mode", ""))
+        if mode:
+            parts.append(f"obfs={mode}")
+        host = str(opts.get("host", ""))
+        if host:
+            parts.append(f"obfs-host={host}")
+    elif plugin in ("v2ray-plugin", "v2ray"):
+        parts.append("v2ray-plugin")
+        mode = str(opts.get("mode", "") or "websocket")
+        parts.append(f"mode={mode}")
+        if opts.get("tls"):
+            parts.append("tls")
+        host = str(opts.get("host", ""))
+        if host:
+            parts.append(f"host={host}")
+        path = str(opts.get("path", ""))
+        if path:
+            parts.append(f"path={path}")
+    else:
+        return ""
+    return ";".join(part for part in parts if part)
+
+
 def _simple_uri(scheme: str, proxy: dict[str, Any]) -> str:
     """Build a basic userinfo-style URI for http / socks5 proxies."""
     server = _uri_host(proxy.get("server", ""))
@@ -1367,7 +1481,15 @@ def _ss_to_uri(proxy: dict[str, Any]) -> str:
     port = proxy.get("port", 0)
     name = str(proxy.get("name", ""))
     userinfo = base64.b64encode(f"{cipher}:{password}".encode()).decode().rstrip("=")
-    return f"ss://{userinfo}@{_uri_host(server)}:{port}#{quote(name, safe='')}"
+
+    query = ""
+    if proxy.get("plugin"):
+        plugin_value = _ss_plugin_param(proxy)
+        if not plugin_value:
+            # An unexpressible plugin would produce a dead link; skip instead.
+            return ""
+        query = f"?plugin={quote(plugin_value, safe='')}"
+    return f"ss://{userinfo}@{_uri_host(server)}:{port}{query}#{quote(name, safe='')}"
 
 
 def _ssr_to_uri(proxy: dict[str, Any]) -> str:
@@ -1409,20 +1531,12 @@ def _vmess_to_uri(proxy: dict[str, Any]) -> str:
     # effectively tls or none, and a bogus token would yield a broken link.
     tls_val = _normalize_tls(proxy.get("tls", ""), default="", pass_through=False)
 
-    ws_opts = proxy.get("ws-opts")
-    ws_opts_dict = ws_opts if isinstance(ws_opts, dict) else {}
-    default_host = ""
-    headers = ws_opts_dict.get("headers")
-    if isinstance(headers, dict):
-        default_host = headers.get("Host", "")
+    ws_path, ws_host = _ws_transport(proxy)
 
     # In the vmess:// JSON, "type" is the camouflage type (http/srtp/...),
     # not the proxy type "vmess".
     net_type = "http" if isinstance(proxy.get("http-opts"), dict) else "none"
     grpc_opts = proxy.get("grpc-opts")
-    grpc_service = (
-        grpc_opts.get("grpc-service-name", "") if isinstance(grpc_opts, dict) else ""
-    )
 
     config = {
         "v": "2",
@@ -1433,13 +1547,13 @@ def _vmess_to_uri(proxy: dict[str, Any]) -> str:
         "aid": str(proxy.get("alterId", 0)),
         "scy": str(proxy.get("cipher", "auto")),
         "net": "grpc" if isinstance(grpc_opts, dict) else str(proxy.get("network", "tcp")),
-        "serviceName": str(grpc_service),
+        "serviceName": _grpc_service_name(proxy),
         "type": net_type,
-        "host": str(proxy.get("host", default_host)),
-        "path": str(proxy.get("path", ws_opts_dict.get("path", "/"))),
+        "host": ws_host,
+        "path": ws_path,
         "tls": str(tls_val),
         "sni": str(proxy.get("sni", proxy.get("servername", ""))),
-        "alpn": str(proxy.get("alpn", "")),
+        "alpn": alpn_value(proxy.get("alpn", "")),
         "fp": str(proxy.get("fp", proxy.get("fingerprint", ""))),
     }
     encoded = base64.b64encode(
@@ -1470,15 +1584,13 @@ def _vless_to_uri(proxy: dict[str, Any]) -> str:
             if value not in (None, ""):
                 params.append(f"{key}={quote(str(value), safe='')}")
     if network == "ws":
-        params.append(f"path={quote(str(proxy.get('path', '/')), safe='')}")
-        params.append(f"host={quote(str(proxy.get('host', '')), safe='')}")
+        ws_path, ws_host = _ws_transport(proxy)
+        params.append(f"path={quote(ws_path, safe='')}")
+        params.append(f"host={quote(ws_host, safe='')}")
     elif network == "grpc":
-        grpc_opts = proxy.get("grpc-opts")
-        service = proxy.get("serviceName") or (
-            grpc_opts.get("grpc-service-name", "") if isinstance(grpc_opts, dict) else ""
-        )
+        service = _grpc_service_name(proxy)
         if service:
-            params.append(f"serviceName={quote(str(service), safe='')}")
+            params.append(f"serviceName={quote(service, safe='')}")
     _append_sni_param(params, proxy.get("sni"))
     params.append(f"encryption={proxy.get('encryption', 'none')}")
     fp = str(proxy.get("fp", proxy.get("fingerprint", "")))
@@ -1499,6 +1611,19 @@ def _trojan_to_uri(proxy: dict[str, Any]) -> str:
     alpn = proxy.get("alpn")
     if alpn:
         params.append(f"alpn={quote(alpn_value(alpn), safe='')}")
+    network = str(proxy.get("network", "tcp")).strip().lower()
+    if network == "ws":
+        # Transport details are appended only for non-tcp networks so plain
+        # trojan links stay byte-identical to previous versions.
+        params.append("type=ws")
+        ws_path, ws_host = _ws_transport(proxy)
+        params.append(f"path={quote(ws_path, safe='')}")
+        params.append(f"host={quote(ws_host, safe='')}")
+    elif network == "grpc":
+        params.append("type=grpc")
+        service = _grpc_service_name(proxy)
+        if service:
+            params.append(f"serviceName={quote(service, safe='')}")
     if proxy.get("skip-cert-verify") or SKIP_CERT_VERIFY:
         # Keep cert verification on by default; disable it only when the
         # node (or the global opt-in) explicitly asks for it, mirroring the
@@ -1520,7 +1645,9 @@ def _hysteria_to_uri(proxy: dict[str, Any]) -> str:
     scheme = "hysteria" if str(proxy.get("type", "")).lower() == "hysteria" else "hysteria2"
 
     params = []
-    if proxy.get("insecure"):
+    if proxy.get("insecure") or proxy.get("skip-cert-verify") or SKIP_CERT_VERIFY:
+        # Honour the Clash field plus the global opt-in, mirroring how the
+        # trojan/tuic converters treat certificate verification.
         params.append("insecure=1")
     _append_sni_param(params, proxy.get("sni"))
     for key in ("up", "down"):

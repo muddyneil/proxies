@@ -6,8 +6,12 @@ Run from the repository root:
 """
 
 import base64
+import contextlib
+import io
 import json
 import os
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -551,6 +555,283 @@ class CertVerifyPolicyTest(unittest.TestCase):
             "allowInsecure=1",
             gen.proxy_to_uri({**base, "skip-cert-verify": True}),
         )
+
+
+class UriTransportRegressionTest(unittest.TestCase):
+    """Regression coverage for URI transport-field fixes (R3-M1/M2/L1/L6)."""
+
+    def test_vless_ws_reads_ws_opts(self):
+        proxy = {
+            "name": "n", "type": "vless", "server": "1.2.3.4", "port": 443,
+            "uuid": "u", "tls": True, "network": "ws",
+            "ws-opts": {"path": "/wspath", "headers": {"Host": "cdn.example.com"}},
+        }
+        uri = gen.proxy_to_uri(proxy)
+        self.assertIn("type=ws", uri)
+        self.assertIn("path=%2Fwspath", uri)
+        self.assertIn("host=cdn.example.com", uri)
+
+    def test_vless_top_level_path_still_wins(self):
+        proxy = {
+            "name": "n", "type": "vless", "server": "1.2.3.4", "port": 443,
+            "uuid": "u", "tls": True, "network": "ws",
+            "path": "/top", "ws-opts": {"path": "/nested"},
+        }
+        self.assertIn("path=%2Ftop", gen.proxy_to_uri(proxy))
+
+    def test_vmess_ws_reads_ws_opts(self):
+        proxy = {
+            "name": "n", "type": "vmess", "server": "1.2.3.4", "port": 443,
+            "uuid": "u", "tls": True, "network": "ws",
+            "ws-opts": {"path": "/wspath", "headers": {"Host": "cdn.example.com"}},
+        }
+        payload = json.loads(
+            base64.b64decode(gen.proxy_to_uri(proxy)[len("vmess://"):])
+        )
+        self.assertEqual(payload["path"], "/wspath")
+        self.assertEqual(payload["host"], "cdn.example.com")
+
+    def test_vmess_alpn_list_joined(self):
+        proxy = {
+            "name": "n", "type": "vmess", "server": "1.2.3.4", "port": 443,
+            "uuid": "u", "alpn": ["h2", "http/1.1"],
+        }
+        payload = json.loads(
+            base64.b64decode(gen.proxy_to_uri(proxy)[len("vmess://"):])
+        )
+        self.assertEqual(payload["alpn"], "h2,http/1.1")
+
+    def test_ss_obfs_plugin_encoded(self):
+        proxy = {
+            "name": "n", "type": "ss", "server": "1.2.3.4", "port": 8388,
+            "password": "pw", "cipher": "aes-256-gcm",
+            "plugin": "obfs", "plugin-opts": {"mode": "http", "host": "bing.com"},
+        }
+        uri = gen.proxy_to_uri(proxy)
+        self.assertIn("?plugin=", uri)
+        self.assertIn("obfs-local%3Bobfs%3Dhttp%3Bobfs-host%3Dbing.com", uri)
+
+    def test_ss_v2ray_plugin_encoded(self):
+        proxy = {
+            "name": "n", "type": "ss", "server": "1.2.3.4", "port": 8388,
+            "password": "pw", "cipher": "aes-256-gcm",
+            "plugin": "v2ray-plugin",
+            "plugin-opts": {"mode": "websocket", "tls": True, "host": "x.com"},
+        }
+        uri = gen.proxy_to_uri(proxy)
+        self.assertIn("v2ray-plugin", uri)
+
+    def test_ss_unknown_plugin_skips_node(self):
+        proxy = {
+            "name": "n", "type": "ss", "server": "1.2.3.4", "port": 8388,
+            "password": "pw", "cipher": "aes-256-gcm", "plugin": "shadowsocksr",
+        }
+        # An unexpressible plugin must drop the node instead of emitting a
+        # dead link.
+        self.assertEqual(gen.proxy_to_uri(proxy), "")
+
+    def test_trojan_ws_transport_kept(self):
+        proxy = {
+            "name": "n", "type": "trojan", "server": "1.2.3.4", "port": 443,
+            "password": "pw", "network": "ws",
+            "ws-opts": {"path": "/ws", "headers": {"Host": "h.com"}},
+        }
+        uri = gen.proxy_to_uri(proxy)
+        self.assertIn("type=ws", uri)
+        self.assertIn("path=%2Fws", uri)
+        self.assertIn("host=h.com", uri)
+
+    def test_trojan_plain_tcp_has_no_type_param(self):
+        proxy = {
+            "name": "n", "type": "trojan", "server": "1.2.3.4", "port": 443,
+            "password": "pw",
+        }
+        self.assertNotIn("type=", gen.proxy_to_uri(proxy))
+
+
+class HysteriaCertPolicyTest(unittest.TestCase):
+    """Hysteria/hysteria2 URIs honour skip-cert-verify like trojan/tuic."""
+
+    def tearDown(self) -> None:
+        gen.SKIP_CERT_VERIFY = False
+
+    def _proxy(self, extra: dict | None = None) -> dict:
+        proxy = {
+            "name": "n", "type": "hysteria2", "server": "1.2.3.4",
+            "port": 443, "password": "p",
+        }
+        if extra:
+            proxy.update(extra)
+        return proxy
+
+    def test_skip_cert_verify_field_adds_insecure(self):
+        proxy = self._proxy({"skip-cert-verify": True})
+        self.assertIn("insecure=1", gen.proxy_to_uri(proxy))
+
+    def test_insecure_field_adds_insecure(self):
+        self.assertIn("insecure=1", gen.proxy_to_uri(self._proxy({"insecure": True})))
+
+    def test_no_flag_keeps_verification(self):
+        self.assertNotIn("insecure", gen.proxy_to_uri(self._proxy()))
+
+    def test_global_opt_in_applies(self):
+        gen.SKIP_CERT_VERIFY = True
+        self.assertIn("insecure=1", gen.proxy_to_uri(self._proxy()))
+
+
+class MihomoAssetSelectionTest(unittest.TestCase):
+    """Asset filtering / discovery robustness (R3-L2/L3/L4/L5)."""
+
+    LINUX_TOKENS = ("linux", ["amd64"])
+
+    def test_filter_rejects_tarball_and_orders_candidates(self):
+        names = [
+            "mihomo-linux-amd64-v1.0.0.tar.gz",
+            "mihomo-linux-amd64-compatible-v1.0.0.gz",
+            "mihomo-linux-amd64-v1.0.0.gz",
+        ]
+        # Pin the platform so the assertion holds on any dev machine.
+        with mock.patch.object(
+            gen, "mihomo_platform_tokens", return_value=self.LINUX_TOKENS
+        ):
+            matched = gen.filter_mihomo_assets(names)
+        self.assertNotIn(names[0], matched)
+        self.assertEqual(matched[0], names[1])  # compatible variant scores best
+
+    def test_scrape_handles_uppercase_asset_names(self):
+        class RedirectResponse:
+            status_code = 302
+
+            def __init__(self) -> None:
+                self.headers = {
+                    "Location": "https://github.com/MetaCubeX/mihomo/releases/tag/v1.19.2"
+                }
+
+        html = (
+            '<a href="/MetaCubeX/mihomo/releases/download/v1.19.2/'
+            'Mihomo-Linux-amd64-v1.19.2.gz">download</a>'
+        )
+        with (
+            mock.patch.object(gen.requests, "get", return_value=RedirectResponse()),
+            mock.patch.object(gen, "fetch_text", return_value=html),
+            mock.patch.object(
+                gen, "mihomo_platform_tokens", return_value=self.LINUX_TOKENS
+            ),
+            mock.patch.object(gen, "mihomo_asset_available", return_value=True),
+        ):
+            url = gen.select_mihomo_asset()
+        self.assertIn("Mihomo-Linux-amd64-v1.19.2.gz", url)
+
+    def test_invalid_api_tag_falls_back_to_release_page(self):
+        class ApiResponse:
+            status_code = 200
+
+            def json(self):
+                return {
+                    "tag_name": "",
+                    "assets": [{"name": "mihomo-linux-amd64-v1.0.0.gz"}],
+                }
+
+        class RedirectResponse:
+            status_code = 302
+
+            def __init__(self) -> None:
+                self.headers = {
+                    "Location": "https://github.com/MetaCubeX/mihomo/releases/tag/v1.19.2"
+                }
+
+        html = (
+            '<a href="/MetaCubeX/mihomo/releases/download/v1.19.2/'
+            'mihomo-linux-amd64-v1.19.2.gz">download</a>'
+        )
+        with (
+            mock.patch.object(
+                gen.requests, "get", side_effect=[ApiResponse(), RedirectResponse()]
+            ),
+            mock.patch.object(gen, "fetch_text", return_value=html),
+            mock.patch.object(
+                gen, "mihomo_platform_tokens", return_value=self.LINUX_TOKENS
+            ),
+            mock.patch.object(gen, "mihomo_asset_available", return_value=True),
+        ):
+            url = gen.select_mihomo_asset()
+        self.assertTrue(url.endswith("mihomo-linux-amd64-v1.19.2.gz"))
+
+    def test_download_rejects_oversized_payload(self):
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def raise_for_status(self):
+                pass
+
+            def iter_content(self, chunk_size):
+                while True:
+                    yield b"x" * chunk_size
+
+        target_dir = Path(tempfile.mkdtemp(prefix="dl-test-"))
+        try:
+            with (
+                mock.patch.object(gen.requests, "get", return_value=FakeResponse()),
+                mock.patch.object(gen, "MAX_DOWNLOAD_BYTES", 1024 * 1024),
+                self.assertRaises(RuntimeError),
+            ):
+                gen.download_file(
+                    "https://example.com/mihomo-windows-amd64-v1.zip", target_dir
+                )
+        finally:
+            shutil.rmtree(target_dir, ignore_errors=True)
+
+
+class ProbeConfigWarningTest(unittest.TestCase):
+    """PASS_MIN above PROBE_TIMES must warn instead of failing silently."""
+
+    def test_pass_min_above_times_warns(self):
+        buffer = io.StringIO()
+        original_times, original_min = gen.PROBE_TIMES, gen.PROBE_PASS_MIN
+        gen.PROBE_TIMES, gen.PROBE_PASS_MIN = 1, 2
+        try:
+            with (
+                mock.patch.object(
+                    gen,
+                    "find_or_install_mihomo",
+                    side_effect=RuntimeError("no engine"),
+                ),
+                contextlib.redirect_stdout(buffer),
+                self.assertRaises(RuntimeError),
+            ):
+                gen.benchmark_proxies([{"name": "n"}])
+        finally:
+            gen.PROBE_TIMES, gen.PROBE_PASS_MIN = original_times, original_min
+        self.assertIn("[WARN] PROBE_PASS_MIN=2", buffer.getvalue())
+
+
+class FetchTextCloseTest(unittest.TestCase):
+    """fetch_text must close the streaming response even on failure."""
+
+    def test_response_closed_on_http_error(self):
+        events = []
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                events.append("closed")
+                return False
+
+            def raise_for_status(self):
+                raise RuntimeError("boom")
+
+        with (
+            mock.patch.object(gen.requests, "get", return_value=FakeResponse()),
+            self.assertRaises(RuntimeError),
+        ):
+            gen.fetch_text("http://example.com", retries=1)
+        self.assertEqual(events, ["closed"])
 
 
 if __name__ == "__main__":
