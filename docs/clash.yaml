@@ -1,0 +1,1094 @@
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: true
+unified-delay: true
+tcp-concurrent: true
+generated-by: free-proxy-airport-v7
+generated-at: ci
+proxies:
+- name: 🇺🇸 美国-2844BECE
+  type: hysteria2
+  server: hy2.123266.xyz
+  port: 33333
+  password: bce6c821-200d-421f-bf3d-7159e5246ea0
+  sni: hy2.123266.xyz
+  tfo: false
+- name: 🏁 未知-798A29E5
+  type: hysteria2
+  server: 155.248.209.237
+  port: 33333
+  password: bce6c821-200d-421f-bf3d-7159e5246ea0
+  sni: hy2.123266.xyz
+  tfo: false
+- name: US - zhuhai.uk 03
+  type: vless
+  server: cf2.laowu.life
+  port: 443
+  uuid: 82d01e09-2e38-4bb9-87b2-2c7503a82c2d
+  tls: true
+  servername: cf2.laowu.life
+  network: ws
+  ws-opts:
+    path: /api/v2/stream
+    headers:
+      Host: cf2.laowu.life
+- name: US - zhuhai.uk
+  type: vless
+  server: cf2.laowu.life
+  port: 443
+  uuid: 5abcf400-cc5b-4a90-a525-7136ca1b3f39
+  tls: true
+  servername: cf2.laowu.life
+  network: ws
+  ws-opts:
+    path: /api/v2/stream
+    headers:
+      Host: cf2.laowu.life
+- name: US - zhuhai.uk 08
+  type: ss
+  server: 129.146.74.96
+  port: 50356
+  cipher: 2022-blake3-chacha20-poly1305
+  password: DM4XRM+YsXKRBV8vbBFXyLX1k1pwNMwXivSMmiXKZF4=
+- name: US - zhuhai.uk 06
+  type: ss
+  server: 129.151.9.186
+  port: 50356
+  cipher: 2022-blake3-chacha20-poly1305
+  password: lOBcDkXcCLvC7cRuLJVTWYO1UEPelR3wC2lfBiB4+sg=
+- name: 🇯🇵 日本-6783195D
+  type: ss
+  server: 149.22.87.204
+  port: 443
+  cipher: aes-128-gcm
+  password: shadowsocks
+  udp: true
+- name: 🇯🇵 日本-24FE6D00
+  type: ss
+  server: 149.22.87.240
+  port: 443
+  cipher: aes-128-gcm
+  password: shadowsocks
+- name: SG - zhuhai.uk 04
+  type: vless
+  server: sg3-r.link-t7.com
+  port: 10038
+  uuid: D8ED7FFD-7AA8-4EEB-9020-18A1A38AE6CC
+  udp: true
+  network: grpc
+  tls: true
+  servername: d1.awsstatic.com
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: wOu-BMrXvk9KX23JZrlpUlF4SMjDcejm0vNECdhy5xE
+    short-id: 686c0ef0
+  grpc-opts:
+    grpc-service-name: update
+- name: SG - zhuhai.uk
+  type: ss
+  server: 213.35.110.13
+  port: 56927
+  cipher: 2022-blake3-chacha20-poly1305
+  password: 88AZEnqwe6Y+XvclyDtg1Xr1Lrh0tBW0LgSHR+AwpDI=
+- name: 🇺🇸 美国-185EF251
+  type: hysteria2
+  server: hy2-new.aspidnet.xyz
+  port: 443
+  obfs: salamander
+  obfs-password: c1b4086fea89914496c7e10967a419216566
+  password: QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s
+  sni: hy2-new.aspidnet.xyz
+  tfo: false
+- name: JP - zhuhai.uk 04
+  type: http
+  server: fan.571589.xyz
+  port: 443
+  username: 'null'
+  password: 'null'
+  tls: true
+  sni: fan.571589.xyz
+- name: JP - zhuhai.uk 02
+  type: http
+  server: fan.571589.xyz
+  port: 443
+  username: 'null'
+  password: 'null'
+  tls: true
+- name: US - zhuhai.uk 05
+  type: http
+  server: 147.182.216.4
+  port: 443
+  username: testuser1
+  password: e4b72b531a2d10900519
+  tls: true
+  sni: 93b6d804.acsnet.co
+- name: JP - zhuhai.uk 03
+  type: http
+  server: fan.571589.xyz
+  port: 443
+  tls: true
+- name: 🇭🇰 香港-1E3D1CFC
+  type: http
+  server: 47.238.199.39
+  port: 36735
+  password: VCYBW8pH4z
+  tls: false
+  username: 2XPTvGKBjj
+- name: 🇯🇵 日本 | JPN
+  server: 172.104.81.253
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: JP - zhuhai.uk 01
+  type: vless
+  server: 43.170.8.95
+  port: 443
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  udp: true
+  network: ws
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+- name: 🇩🇪 德国 | DEU
+  server: de1.sferavpn.pro
+  port: 443
+  type: hysteria2
+  password: cd74c0a406664a5bc0bac098220a2468
+  auth: cd74c0a406664a5bc0bac098220a2468
+  sni: de1.sferavpn.pro
+  obfs: salamander
+  obfs-password: 44f1c1e2f8b99e792ceed574627a1eb0
+- name: SG - zhuhai.uk 03
+  type: vless
+  server: 217.217.254.126
+  port: 2053
+  uuid: 30430ca4-9a16-4689-a276-4014599d2f39
+  udp: true
+  network: tcp
+  tls: true
+  servername: www.apple.com
+  client-fingerprint: firefox
+  reality-opts:
+    public-key: yVb3JqVqlnXhiIb3E-gAVvgsXCpWgoeLIAJau9yuZ1I
+    short-id: 3fc9b11ceeb2cc6b
+- name: NL - zhuhai.uk 04
+  type: vless
+  server: 141.144.205.135
+  port: 62145
+  uuid: 8fb65472-5957-4f64-ba2d-b5812b2f155a
+- name: 🇫🇷 法国 | FRA
+  server: 95.170.13.47
+  port: 65443
+  type: ss
+  cipher: aes-256-cfb
+  password: 7eadc6dbe2ae
+- name: 🇺🇸 美国 | USA 2
+  server: 23.27.245.194
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: US - zhuhai.uk 01
+  type: vless
+  server: 162.35.231.142
+  port: 443
+  uuid: b5ca5ab3-8cbc-4ac3-89da-9cd360589ecb
+  udp: true
+  network: tcp
+  flow: xtls-rprx-vision
+  tls: true
+  servername: savesafe.co
+  client-fingerprint: qq
+  reality-opts:
+    public-key: 6z3YcVP0f2pK3iANKIkBUZOgNeErDjxY83mHZG5jrnI
+    short-id: f63805c3ecc7a483
+- name: HK - zhuhai.uk 02
+  type: socks5
+  server: 47.239.116.165
+  port: 1080
+  username: admin
+  password: admin
+- name: 🇺🇸 美国 | USA 3
+  server: 38.97.249.166
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: DE - zhuhai.uk 02
+  type: ss
+  server: 130.61.236.143
+  port: 59924
+  cipher: 2022-blake3-chacha20-poly1305
+  password: Al3fRrC5DVErEdhREpouv5xxxkU+5wgYtkGRYiEDhQw=
+- name: NL - zhuhai.uk 02
+  type: vless
+  server: 158.101.209.191
+  port: 62145
+  uuid: 8fb65472-5957-4f64-ba2d-b5812b2f155a
+- name: 🇪🇪 爱沙尼亚 | EST
+  server: faq.wwwinternetvideo.click
+  port: 443
+  type: hysteria2
+  password: sOiWCQ2AdIV0OWNuqQVyWp4JZnRxdyLROSjX
+  auth: sOiWCQ2AdIV0OWNuqQVyWp4JZnRxdyLROSjX
+  sni: cabinet.wwwinternetvideo.click
+- name: 🇭🇰 香港 | HKG
+  server: 155.117.224.127
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇸🇬 新加坡 | SGP
+  server: 43.160.246.223
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- cipher: 2022-blake3-chacha20-poly1305
+  name: br|f7eb|puddincat07@Telegram
+  password: fQD3R706R6XGUCXh5XwMDv6IbqQO+g4iVYx5OnT/Cqs=
+  port: 59319
+  server: 150.230.77.159
+  type: ss
+  udp: true
+- name: NL - zhuhai.uk 01
+  type: vless
+  server: 154.83.246.2
+  port: 443
+  uuid: 19b64e79-73b4-4478-bbfc-fb57737b94f8
+  udp: true
+  network: tcp
+  flow: xtls-rprx-vision
+  tls: true
+  servername: storage.yandex.net
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: pPi-WO8qQFFZ9UJWNLW9YClbjcoAAZWJQ2_FM3Kjhz8
+    short-id: d3ee47fc2f553c44
+- client-fingerprint: chrome
+  name: us|f410|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 172.67.74.2
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Linux; Android 7.0; TRT-LX2 Build/HUAWEITRT-LX2; wv)
+        AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/59.0.3071.125 Mobile
+        Safari/537.36
+    path: /assignment
+- name: 🇰🇷 韩国-B33A9C54
+  type: ss
+  server: 218.237.185.230
+  port: 4652
+  cipher: aes-256-cfb
+  password: qwerREWQ@@
+  udp: false
+- name: SG - zhuhai.uk 05
+  type: vless
+  server: nian.001.url111.kcloud02.top
+  port: 15006
+  uuid: 399c4c9b-27e1-37f1-9dce-22ccc2727a86
+  udp: true
+  network: tcp
+  flow: xtls-rprx-vision
+  tls: true
+  servername: www.adobe.com
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: g9KZONtwSL8mL772rps2nXVAuQpsgHY33K_pHpI89Rg
+    short-id: 029a6cc4
+- name: 🇩🇪 德国 | DEU 5
+  server: 77.91.66.178
+  port: 443
+  type: vless
+  uuid: dbb5075f-2ff4-4aad-a952-bcc82e4a6355
+  tls: true
+  flow: xtls-rprx-vision
+  reality-opts:
+    public-key: V3uMWEfDQAPFP6o5ED8Jtk0rJBPs7IlOLf_Wh8w_jXc
+    short-id: 76132b3b39704c44
+  servername: de1.hat.onl
+  client-fingerprint: qq
+  network: tcp
+  udp: true
+- cipher: aes-256-cfb
+  name: th|55f8|puddincat07@Telegram
+  password: 7eadc6dbe2ae
+  port: 65443
+  server: 103.169.67.34
+  type: ss
+- name: GB - zhuhai.uk
+  type: http
+  server: dcc24bfd-t9zts0-thzbn1-1gxvd.uk.oshuawei.com
+  port: 443
+  username: 398e0d38-8649-11ef-959c-f23c9164ca5d
+  password: 398e0d38-8649-11ef-959c-f23c9164ca5d
+  tls: true
+  sni: dcc24bfd-t9zts0-thzbn1-1gxvd.uk.oshuawei.com
+- name: PL - zhuhai.uk
+  type: vless
+  server: 31.59.125.49
+  port: 443
+  uuid: 423b1d79-08c4-403f-9d5e-c541f791b55f
+  flow: xtls-rprx-vision
+  tls: true
+  servername: eu-central.cendora.ru
+  client-fingerprint: qq
+  reality-opts:
+    public-key: b-Cm9hX-3UHsS1L_lnUB6AMjuKhlN1IDdBbZ506itjI
+    short-id: 00bca5982f82d083
+- name: KR - zhuhai.uk 02
+  type: http
+  server: 891f3762-ta1og0-tiqsce-t6fv.kr.oshuawei.com
+  port: 31433
+  username: af7ddbb2-3567-11ec-bd7c-f23c913c8d2b
+  password: af7ddbb2-3567-11ec-bd7c-f23c913c8d2b
+  tls: true
+  sni: 891f3762-ta1og0-tiqsce-t6fv.kr.oshuawei.com
+- client-fingerprint: chrome
+  name: us|f508|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 130.250.137.171
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.7
+        (KHTML, like Gecko) Chrome/7.0.517.44 Safari/534.7
+    path: /assignment
+- name: 🇺🇸 美国 | USA 4
+  server: 43.169.19.179
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- client-fingerprint: chrome
+  name: us|2fd2|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 104.16.174.36
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like
+        Gecko) Chrome/36.0.1985.125 Safari/537.36
+    path: /assignment
+- alpn:
+  - h3
+  - h2
+  - http/1.1
+  client-fingerprint: chrome
+  name: us|2a14|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 172.67.221.242
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like
+        Gecko) Chrome/49.0.2623.112 Safari/537.36
+    path: /assignment
+- client-fingerprint: chrome
+  name: us|1405|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 104.18.152.143
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Linux; Android 8.0.0; ANE-LX3 Build/HUAWEIANE-LX3)
+        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Mobile Safari/537.36
+    path: /assignment
+- client-fingerprint: chrome
+  name: us|01ca|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 104.18.152.244
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like
+        Gecko) Chrome/37.0.2062.120 Safari/537.36
+    path: /assignment
+- client-fingerprint: chrome
+  name: us|1c92|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 104.18.152.230
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML,
+        like Gecko) Chrome/60.0.3112.113 Safari/537.36
+    path: /assignment
+- client-fingerprint: chrome
+  name: us|b4ce|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 104.16.174.117
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML,
+        like Gecko) Chrome/54.0.2840.99 Safari/537.36
+    path: /assignment
+- client-fingerprint: chrome
+  name: us|e9fc|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: 104.21.46.3
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML,
+        like Gecko) Chrome/65.0.3325.181 Safari/537.36
+    path: /assignment
+- name: AE - zhuhai.uk 01
+  type: vless
+  server: 151.242.160.49
+  port: 443
+  uuid: 423b1d79-08c4-403f-9d5e-c541f791b55f
+  udp: true
+  network: tcp
+  flow: xtls-rprx-vision
+  tls: true
+  servername: eu-central.cendora.ru
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: b-Cm9hX-3UHsS1L_lnUB6AMjuKhlN1IDdBbZ506itjI
+    short-id: 00bca5982f82d083
+- client-fingerprint: chrome
+  name: xx|9b26|puddincat07@Telegram
+  network: ws
+  password: humanity
+  port: 443
+  server: render.com
+  sni: www.ignitelimit.com
+  type: trojan
+  udp: true
+  ws-opts:
+    headers:
+      User-Agent: Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML,
+        like Gecko) Chrome/60.0.3112.90 Safari/537.36
+    path: /assignment
+- name: 🇹🇼 🇨🇳 台湾 | TWN
+  server: 82.152.91.210
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇰🇷 韩国 | KOR
+  server: 168.107.32.255
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇨🇦 加拿大 | CAN
+  server: 207.90.192.164
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: KR - zhuhai.uk
+  type: hysteria2
+  server: 139.28.168.58
+  port: 8080
+  password: 0wdsa_nJXEWRj9jz9J9xMgtx_n7gzfK_m8
+  sni: grape-honk.yyuyy.com
+- name: 🇬🇧 英国 | GBR
+  server: 193.219.99.44
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇦🇹 奥地利 | AUT
+  server: 132.243.203.249
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇳🇱 荷兰 | NLD 10
+  server: 72.56.106.58
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇦🇹 奥地利 | AUT 2
+  server: 132.243.245.123
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇨🇿 捷克 | CZE
+  server: 188.214.35.66
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇩🇪 德国 | DEU 2
+  server: 159.100.19.241
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇳🇱 荷兰 | NLD 7
+  server: 43.170.17.114
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇧🇪 比利时 | BEL
+  server: 132.243.204.84
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇩🇪 德国 | DEU 9
+  server: 91.184.250.202
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇳🇱 荷兰 | NLD 6
+  server: 38.180.18.43
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇳🇱 荷兰 | NLD 5
+  server: 194.87.0.196
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇳🇱 荷兰 | NLD 4
+  server: 188.190.26.243
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇫🇷 法国 | FRA 4
+  server: 31.57.108.170
+  port: 2053
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇳🇱 荷兰 | NLD 2
+  server: 185.214.10.72
+  port: 2053
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇸🇪 瑞典 | SWE 4
+  server: 84.32.99.175
+  port: 8443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  udp: true
+- name: 🇦🇹 奥地利 | AUT 5
+  server: 132.243.245.239
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇱🇹 立陶宛 | LTU
+  server: 91.197.2.220
+  port: 443
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: 🇧🇬 保加利亚 | BGR 3
+  server: 13.140.29.144
+  port: 2087
+  type: vless
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  tls: true
+  servername: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  client-fingerprint: chrome
+  network: ws
+  ws-opts:
+    path: /pg/10086-dfc816f117c49173
+    headers:
+      Host: j.n.i.l.6.m.7.3.o.t.e.s.j.3.us.art-us.kdns.fr
+  udp: true
+- name: SE - zhuhai.uk 07
+  type: vless
+  server: 193.124.22.24
+  port: 443
+  uuid: 9ce4c9e2-1dcc-abe8-9abf-9bf8bc1269f6
+  udp: true
+  network: ws
+  tls: true
+  servername: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+  ws-opts:
+    path: /pg/10086-dfc816f117c491730| 🇱🇻 拉脱维亚 01 | 193.124.22.24:443
+    headers:
+      Host: 8.o.8.e.t.g.7.w.8.n.e.1.l.e.us.art-us.kdns.fr
+proxy-groups:
+- name: AUTO-FAST
+  type: url-test
+  proxies:
+  - 🇺🇸 美国-2844BECE
+  - 🏁 未知-798A29E5
+  - US - zhuhai.uk 03
+  - US - zhuhai.uk
+  - US - zhuhai.uk 08
+  - US - zhuhai.uk 06
+  - 🇯🇵 日本-6783195D
+  - 🇯🇵 日本-24FE6D00
+  - SG - zhuhai.uk 04
+  - SG - zhuhai.uk
+  - 🇺🇸 美国-185EF251
+  - JP - zhuhai.uk 04
+  - JP - zhuhai.uk 02
+  - US - zhuhai.uk 05
+  - JP - zhuhai.uk 03
+  - 🇭🇰 香港-1E3D1CFC
+  - 🇯🇵 日本 | JPN
+  - JP - zhuhai.uk 01
+  - 🇩🇪 德国 | DEU
+  - SG - zhuhai.uk 03
+  - NL - zhuhai.uk 04
+  - 🇫🇷 法国 | FRA
+  - 🇺🇸 美国 | USA 2
+  - US - zhuhai.uk 01
+  - HK - zhuhai.uk 02
+  - 🇺🇸 美国 | USA 3
+  - DE - zhuhai.uk 02
+  - NL - zhuhai.uk 02
+  - 🇪🇪 爱沙尼亚 | EST
+  - 🇭🇰 香港 | HKG
+  - 🇸🇬 新加坡 | SGP
+  - br|f7eb|puddincat07@Telegram
+  - NL - zhuhai.uk 01
+  - us|f410|puddincat07@Telegram
+  - 🇰🇷 韩国-B33A9C54
+  - SG - zhuhai.uk 05
+  - 🇩🇪 德国 | DEU 5
+  - th|55f8|puddincat07@Telegram
+  - GB - zhuhai.uk
+  - PL - zhuhai.uk
+  - KR - zhuhai.uk 02
+  - us|f508|puddincat07@Telegram
+  - 🇺🇸 美国 | USA 4
+  - us|2fd2|puddincat07@Telegram
+  - us|2a14|puddincat07@Telegram
+  - us|1405|puddincat07@Telegram
+  - us|01ca|puddincat07@Telegram
+  - us|1c92|puddincat07@Telegram
+  - us|b4ce|puddincat07@Telegram
+  - us|e9fc|puddincat07@Telegram
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+  lazy: true
+- name: HK-POOL
+  type: url-test
+  proxies:
+  - 🇭🇰 香港-1E3D1CFC
+  - HK - zhuhai.uk 02
+  - 🇭🇰 香港 | HKG
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+  lazy: true
+- name: JP-POOL
+  type: url-test
+  proxies:
+  - 🇯🇵 日本-6783195D
+  - 🇯🇵 日本-24FE6D00
+  - JP - zhuhai.uk 04
+  - JP - zhuhai.uk 02
+  - JP - zhuhai.uk 03
+  - 🇯🇵 日本 | JPN
+  - JP - zhuhai.uk 01
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+  lazy: true
+- name: US-POOL
+  type: url-test
+  proxies:
+  - 🇺🇸 美国-2844BECE
+  - US - zhuhai.uk 03
+  - US - zhuhai.uk
+  - US - zhuhai.uk 08
+  - US - zhuhai.uk 06
+  - 🇺🇸 美国-185EF251
+  - US - zhuhai.uk 05
+  - 🇺🇸 美国 | USA 2
+  - US - zhuhai.uk 01
+  - 🇺🇸 美国 | USA 3
+  - us|f410|puddincat07@Telegram
+  - us|f508|puddincat07@Telegram
+  - 🇺🇸 美国 | USA 4
+  - us|2fd2|puddincat07@Telegram
+  - us|2a14|puddincat07@Telegram
+  - us|1405|puddincat07@Telegram
+  - us|01ca|puddincat07@Telegram
+  - us|1c92|puddincat07@Telegram
+  - us|b4ce|puddincat07@Telegram
+  - us|e9fc|puddincat07@Telegram
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+  lazy: true
+- name: AI-POOL
+  type: url-test
+  proxies:
+  - 🇺🇸 美国-2844BECE
+  - 🏁 未知-798A29E5
+  - US - zhuhai.uk 03
+  - US - zhuhai.uk
+  - US - zhuhai.uk 08
+  - US - zhuhai.uk 06
+  - 🇯🇵 日本-6783195D
+  - 🇯🇵 日本-24FE6D00
+  - 🇩🇪 德国 | DEU
+  - 🇺🇸 美国-185EF251
+  - US - zhuhai.uk 05
+  - NL - zhuhai.uk 04
+  - 🇫🇷 法国 | FRA
+  - SG - zhuhai.uk 04
+  - DE - zhuhai.uk 02
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+  lazy: true
+- name: ALL
+  type: select
+  proxies:
+  - 🇺🇸 美国-2844BECE
+  - 🏁 未知-798A29E5
+  - US - zhuhai.uk 03
+  - US - zhuhai.uk
+  - US - zhuhai.uk 08
+  - US - zhuhai.uk 06
+  - 🇯🇵 日本-6783195D
+  - 🇯🇵 日本-24FE6D00
+  - SG - zhuhai.uk 04
+  - SG - zhuhai.uk
+  - 🇺🇸 美国-185EF251
+  - JP - zhuhai.uk 04
+  - JP - zhuhai.uk 02
+  - US - zhuhai.uk 05
+  - JP - zhuhai.uk 03
+  - 🇭🇰 香港-1E3D1CFC
+  - 🇯🇵 日本 | JPN
+  - JP - zhuhai.uk 01
+  - 🇩🇪 德国 | DEU
+  - SG - zhuhai.uk 03
+  - NL - zhuhai.uk 04
+  - 🇫🇷 法国 | FRA
+  - 🇺🇸 美国 | USA 2
+  - US - zhuhai.uk 01
+  - HK - zhuhai.uk 02
+  - 🇺🇸 美国 | USA 3
+  - DE - zhuhai.uk 02
+  - NL - zhuhai.uk 02
+  - 🇪🇪 爱沙尼亚 | EST
+  - 🇭🇰 香港 | HKG
+  - 🇸🇬 新加坡 | SGP
+  - br|f7eb|puddincat07@Telegram
+  - NL - zhuhai.uk 01
+  - us|f410|puddincat07@Telegram
+  - 🇰🇷 韩国-B33A9C54
+  - SG - zhuhai.uk 05
+  - 🇩🇪 德国 | DEU 5
+  - th|55f8|puddincat07@Telegram
+  - GB - zhuhai.uk
+  - PL - zhuhai.uk
+  - KR - zhuhai.uk 02
+  - us|f508|puddincat07@Telegram
+  - 🇺🇸 美国 | USA 4
+  - us|2fd2|puddincat07@Telegram
+  - us|2a14|puddincat07@Telegram
+  - us|1405|puddincat07@Telegram
+  - us|01ca|puddincat07@Telegram
+  - us|1c92|puddincat07@Telegram
+  - us|b4ce|puddincat07@Telegram
+  - us|e9fc|puddincat07@Telegram
+  - AE - zhuhai.uk 01
+  - xx|9b26|puddincat07@Telegram
+  - 🇹🇼 🇨🇳 台湾 | TWN
+  - 🇰🇷 韩国 | KOR
+  - 🇨🇦 加拿大 | CAN
+  - KR - zhuhai.uk
+  - 🇬🇧 英国 | GBR
+  - 🇦🇹 奥地利 | AUT
+  - 🇳🇱 荷兰 | NLD 10
+  - 🇦🇹 奥地利 | AUT 2
+  - 🇨🇿 捷克 | CZE
+  - 🇩🇪 德国 | DEU 2
+  - 🇳🇱 荷兰 | NLD 7
+  - 🇧🇪 比利时 | BEL
+  - 🇩🇪 德国 | DEU 9
+  - 🇳🇱 荷兰 | NLD 6
+  - 🇳🇱 荷兰 | NLD 5
+  - 🇳🇱 荷兰 | NLD 4
+  - 🇫🇷 法国 | FRA 4
+  - 🇳🇱 荷兰 | NLD 2
+  - 🇸🇪 瑞典 | SWE 4
+  - 🇦🇹 奥地利 | AUT 5
+  - 🇱🇹 立陶宛 | LTU
+  - 🇧🇬 保加利亚 | BGR 3
+  - SE - zhuhai.uk 07
+- name: FALLBACK
+  type: fallback
+  proxies:
+  - AUTO-FAST
+  - HK-POOL
+  - JP-POOL
+  - US-POOL
+  url: http://www.gstatic.com/generate_204
+  interval: 120
+- name: PROXY
+  type: select
+  proxies:
+  - AUTO-FAST
+  - FALLBACK
+  - ALL
+rules:
+- DOMAIN-SUFFIX,openai.com,AI-POOL
+- DOMAIN-SUFFIX,chatgpt.com,AI-POOL
+- DOMAIN-SUFFIX,claude.ai,AI-POOL
+- DOMAIN-SUFFIX,anthropic.com,AI-POOL
+- GEOIP,CN,DIRECT
+- MATCH,PROXY

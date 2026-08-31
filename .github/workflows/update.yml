@@ -1,0 +1,129 @@
+name: AI Self-Healing Proxy v7
+
+on:
+  schedule:
+    - cron: "13,43 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proxy-pages-production
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    outputs:
+      clash_sha: ${{ steps.summary.outputs.clash_sha }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.6"
+
+      - name: Install locked dependencies
+        run: uv sync --frozen
+
+      - name: Generate live subscription
+        env:
+          FREE_PROXY_AIRPORT_DISABLE_MIRRORS: "1"
+          FREE_PROXY_AIRPORT_REQUIRE_LIVE: "1"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          uv run python generator.py
+          mkdir -p docs
+          cp output/clash.yaml docs/clash.yaml
+          rm -f docs/rocket.txt docs/v2ray.txt
+          touch docs/.nojekyll
+
+      - name: Validate final Clash config
+        env:
+          FREE_PROXY_AIRPORT_DISABLE_MIRRORS: "1"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: uv run python generator.py --validate-with-mihomo --config docs/clash.yaml
+
+      - name: Validate generated timestamp
+        run: |
+          uv run python - <<'PY'
+          from datetime import UTC, datetime, timedelta
+          from pathlib import Path
+
+          import yaml
+
+          config = yaml.safe_load(Path("docs/clash.yaml").read_text(encoding="utf-8"))
+          generated_at = datetime.fromisoformat(config["generated-at"])
+          if generated_at.tzinfo is None:
+              raise SystemExit("generated Clash config timestamp has no timezone")
+          age = datetime.now(UTC) - generated_at.astimezone(UTC)
+          if age < timedelta(minutes=-5) or age > timedelta(hours=1):
+              raise SystemExit("generated Clash config timestamp is invalid or stale")
+          PY
+
+      - name: Restrict deployment files
+        run: |
+          test -z "$(find docs -type l -print -quit)"
+          test "$(find docs -type f | wc -l)" -eq 2
+          test -z "$(find docs -mindepth 1 -type d -print -quit)"
+          for path in docs/.nojekyll docs/clash.yaml; do
+            test -f "$path"
+          done
+
+      - name: Write run summary
+        id: summary
+        run: |
+          clash_sha="$(sha256sum docs/clash.yaml | cut -d' ' -f1)"
+          echo "clash_sha=$clash_sha" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Proxy generation"
+            echo
+            echo "- Clash SHA-256: \`$clash_sha\`"
+            echo "- Generated at: \`$(awk '$1 == "generated-at:" { print $2 }' docs/clash.yaml)\`"
+            echo "- Generated from live benchmark results"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: docs
+
+  deploy-pages:
+    needs: generate
+    permissions:
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+      - name: Verify deployed Pages content
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_CLASH_SHA: ${{ needs.generate.outputs.clash_sha }}
+        run: |
+          url="${PAGE_URL%/}/clash.yaml?run=$GITHUB_RUN_ID"
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --location "$url" --output /tmp/clash.yaml && [ "$(sha256sum /tmp/clash.yaml | cut -d' ' -f1)" = "$EXPECTED_CLASH_SHA" ]; then
+              break
+            fi
+            [ "$attempt" -lt 12 ] || { echo "Published clash.yaml does not match validated artifact"; exit 1; }
+            sleep 5
+          done
